@@ -2,6 +2,7 @@
 namespace G\Fw;
 
 use Silex\Application;
+use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -43,60 +44,65 @@ class App
 
         $this->app->mount('/auth', $this->authController->getControllerFactory());
         if (!$this->authController->isValidRoute($request)) {
-            $mountConf                            = $this->conf[$request->get('app')];
+            $mountConf = $this->conf[$request->get('app')];
             $this->setUpAppValues($mountConf);
         } else {
-            $route                                = $this->app['controllers_factory'];
-            $mountConf                            = $this->conf[$path];
+            /** @var ControllerCollection $route */
+            $route     = $this->app['controllers_factory'];
+            $mountConf = $this->conf[$path];
             $this->setUpAppValues($mountConf);
 
-            $routePath = str_replace("/" . $path, null, $pathInfo);
-            $route->match($routePath, function (Request $request) use ($routePath, $mountConf) {
-                /** @var BuilderIface $builder */
-                $builder = new $mountConf['builder']($request, $this->app);
-                $builder->preFetch();
-                $builder->setRoutes($mountConf['routes']);
-                $builder->init($routePath);
+            foreach (array_keys($mountConf['routes']) as $routeKey) {
+                list($httpMethod, $routePath) = explode("::", $routeKey);
+                $route->match($routePath, function (Request $request) use ($routePath, $mountConf) {
+                    /** @var BuilderIface $builder */
+                    $builder = new $mountConf['builder']($request, $this->app);
+                    $builder->preFetch();
+                    $builder->setRoutes($mountConf['routes']);
+                    $builder->init($routePath);
 
-                $data = $builder->fetch();
-                switch ($builder->getType()) {
-                    case 'raw':
-                        return $data;
-                    case 'stream':
-                        $headers = [
-                            'pdf'  => ['Content-Type' => 'application/pdf'],
-                            'js'   => ['Content-Type' => 'application/javascript'],
-                            'css'  => ['Content-Type' => 'text/css'],
-                            'html' => ['Content-Type' => 'text/html; charset=UTF-8'],
-                            'jpg'  => ['Content-Type' => 'image/jpeg'],
-                        ];
+                    $data = $builder->fetch();
+                    switch ($builder->getType()) {
+                        case 'raw':
+                            return $data;
+                        case 'stream':
+                            $headers = [
+                                'pdf'  => ['Content-Type' => 'application/pdf'],
+                                'js'   => ['Content-Type' => 'application/javascript'],
+                                'css'  => ['Content-Type' => 'text/css'],
+                                'html' => ['Content-Type' => 'text/html; charset=UTF-8'],
+                                'jpg'  => ['Content-Type' => 'image/jpeg'],
+                            ];
 
-                        $stream = function () use ($data) {
-                            echo $data;
-                        };
+                            $stream = function () use ($data) {
+                                echo $data;
+                            };
 
-                        return $this->app->stream($stream, 200, $headers[$builder->getSubType()]);
-                    default:
-                        return $this->app->json($data);
-                }
-            })->before(function (Request $request) use ($mountConf) {
-                $token = $this->validator->getDecodedToken($request->get('_t'));
-
-                if ($token !== false) {
-                    $version = $request->get('_v');
-                    if ($version == $mountConf['version']) {
-                        $this->app['user'] = $token->user;
-                    } else {
-                        throw new HttpException(412, "Wrong version");
+                            return $this->app->stream($stream, 200, $headers[$builder->getSubType()]);
+                        default:
+                            return $this->app->json($data);
                     }
+                })
+                      ->method(strtoupper($httpMethod))
+                      ->before(function (Request $request) use ($mountConf) {
+                          $token = $this->validator->getDecodedToken($request->get('_t'));
 
-                    if (!$this->app['appName'] == $mountConf['appName']) {
-                        throw new AccessDeniedHttpException("Access Denied. Wrong app in token");
-                    }
-                } else {
-                    throw new AccessDeniedHttpException("Access Denied");
-                }
-            });
+                          if ($token !== false) {
+                              $version = $request->get('_v');
+                              if ($version == $mountConf['version']) {
+                                  $this->app['user'] = $token->user;
+                              } else {
+                                  throw new HttpException(412, "Wrong version");
+                              }
+
+                              if (!$this->app['appName'] == $mountConf['appName']) {
+                                  throw new AccessDeniedHttpException("Access Denied. Wrong app in token");
+                              }
+                          } else {
+                              throw new AccessDeniedHttpException("Access Denied");
+                          }
+                      });
+            }
 
             $this->app->mount($path, $route);
         }

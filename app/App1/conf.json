@@ -4,6 +4,7 @@
   "twoFactorAuthentication": true,
   "builder": "\\Demo\\App1\\Builder",
   "routes": {
+    "get::/hello/{name}": "\\Demo\\App1\\X::hello::raw",
     "get::/getData": "\\Demo\\App1\\X::getData",
     "get::/getImg": "\\Demo\\App1\\X::getImg::stream::jpg"
   }
