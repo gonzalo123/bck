@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "appName": "app1",
+  "twoFactorAuthentication": true,
+  "builder": "\\Demo\\App1\\Builder",
+  "routes": {
+    "get::/getData": "\\Demo\\App1\\X::getData",
+    "get::/getImg": "\\Demo\\App1\\X::getImg::stream::jpg"
+  }
+}
