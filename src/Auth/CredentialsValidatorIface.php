@@ -12,4 +12,6 @@ interface CredentialsValidatorIface
     public function getNewToken($appName, $user);
 
     public function getMessage();
+
+    public function setUp(array $conf);
 }

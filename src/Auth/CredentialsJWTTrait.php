@@ -6,8 +6,20 @@ use Firebase\JWT\JWT;
 trait CredentialsJWTTrait
 {
     protected $message;
+    protected $secret         = "superSecretKey";
+    protected $preTokeExpires = "+20 days";
+    protected $tokeExpires    = '+1 hour';
+    protected $allowedTries   = 3;
 
-    public function getDecodedToken($token, $key = self::SECRET)
+    public function setUp(array $conf)
+    {
+        $this->secret         = isset($conf['secret']) ? $conf['secret'] : $this->secret;
+        $this->preTokeExpires = isset($conf['preTokeExpires']) ? $conf['preTokeExpires'] : $this->preTokeExpires;
+        $this->tokeExpires    = isset($conf['tokeExpires']) ? $conf['tokeExpires'] : $this->tokeExpires;
+        $this->allowedTries   = isset($conf['allowedTries']) ? $conf['allowedTries'] : $this->allowedTries;
+    }
+
+    public function getDecodedToken($token, $key)
     {
         try {
             $decoded = JWT::decode($token, $key, ['HS256']);
@@ -28,7 +40,7 @@ trait CredentialsJWTTrait
         $this->emit2FA($token);
 
         return JWT::encode([
-            "exp"      => (new \DateTimeImmutable())->modify(self::PRE_TOKEN_EXPIRES)->getTimestamp(),
+            "exp"      => (new \DateTimeImmutable())->modify($this->preTokeExpires)->getTimestamp(),
             "user"     => $user,
             "appName"  => $appName,
             "pretoken" => true
@@ -38,11 +50,11 @@ trait CredentialsJWTTrait
     public function getNewToken($appName, $user)
     {
         return JWT::encode([
-            "exp"      => (new \DateTimeImmutable())->modify(self::TOKEN_EXPIRES)->getTimestamp(),
+            "exp"      => (new \DateTimeImmutable())->modify($this->tokeExpires)->getTimestamp(),
             "user"     => $user,
             "appName"  => $appName,
             "pretoken" => false,
-        ], self::SECRET);
+        ], $this->secret);
     }
 
     public function getMessage()

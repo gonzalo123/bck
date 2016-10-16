@@ -3,6 +3,10 @@
   "appName": "app1",
   "twoFactorAuthentication": true,
   "builder": "\\Demo\\App1\\Builder",
+  "secret": "ad89006cdad4efa2f1a708a52c2b794a",
+  "preTokeExpires": "+20 days",
+  "tokeExpires": "+1 hour",
+  "allowedTries": 3,
   "routes": {
     "get::/hello/{name}": "\\Demo\\App1\\X::hello::raw",
     "get::/getData": "\\Demo\\App1\\X::getData",

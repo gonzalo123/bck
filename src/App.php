@@ -85,18 +85,16 @@ class App
                 })
                       ->method(strtoupper($httpMethod))
                       ->before(function (Request $request) use ($mountConf) {
-                          $token = $this->validator->getDecodedToken($request->get('_t'));
+                          $token = $this->validator->getDecodedToken($request->get('_t'), $mountConf['secret']);
 
                           if ($token !== false) {
-                              $version = $request->get('_v');
-                              if ($version == $mountConf['version']) {
+                              if ($token->appName != $mountConf['appName']) {
+                                  throw new AccessDeniedHttpException("Access Denied. Wrong app in token");
+                              }
+                              if ($request->get('_v') == $mountConf['version']) {
                                   $this->app['user'] = $token->user;
                               } else {
                                   throw new HttpException(412, "Wrong version");
-                              }
-
-                              if (!$this->app['appName'] == $mountConf['appName']) {
-                                  throw new AccessDeniedHttpException("Access Denied. Wrong app in token");
                               }
                           } else {
                               throw new AccessDeniedHttpException("Access Denied");
@@ -116,5 +114,12 @@ class App
         $this->app['appName']                 = $mountConf['appName'];
         $this->app['twoFactorAuthentication'] = $mountConf['twoFactorAuthentication'];
         $this->app['builder']                 = $mountConf['builder'];
+
+        $this->validator->setUp([
+            'secret'         => $mountConf['secret'],
+            'preTokeExpires' => $mountConf['preTokeExpires'],
+            'tokeExpires'    => $mountConf['tokeExpires'],
+            'allowedTries'   => $mountConf['allowedTries'],
+        ]);
     }
 }
