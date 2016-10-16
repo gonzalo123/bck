@@ -4,6 +4,7 @@ namespace G\Fw;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -105,6 +106,10 @@ class App
             $this->app->mount($path, $route);
         }
 
+        $this->app->finish(function (Request $request, Response $response, Application $app) {
+            error_log($request->getPathInfo());
+            //logger
+        });
         $this->app->run($request);
     }
 

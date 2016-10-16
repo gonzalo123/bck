@@ -75,10 +75,6 @@ abstract class BuilderAbstract
         return $out;
     }
 
-    public function finish(Request $request, Response $response)
-    {
-    }
-
     private function getInstance($class)
     {
         $metaClass = new \ReflectionClass($class);
