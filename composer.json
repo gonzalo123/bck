@@ -11,8 +11,7 @@
       "email": "gonzalo123@gmail.com"
     }
   ],
-  "minimum-stability": "dev",
-
+  
   "autoload": {
     "psr-4": {
       "G\\Bck\\": "src/",
