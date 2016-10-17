@@ -1,5 +1,5 @@
 <?php
-namespace G\Fw\Auth;
+namespace G\Bck\Auth;
 
 interface CredentialsValidatorIface
 {

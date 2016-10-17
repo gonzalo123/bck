@@ -1,11 +1,11 @@
 <?php
-namespace G\Fw\App;
+namespace G\Bck\App;
 
-use G\Fw\App;
+use G\Bck\App;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
-use G\Fw\Auth;
-use G\Fw\Auth\CredentialsValidatorIface;
+use G\Bck\Auth;
+use G\Bck\Auth\CredentialsValidatorIface;
 use Psr\Log\LoggerInterface;
 
 class Builder

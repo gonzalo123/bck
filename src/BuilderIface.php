@@ -1,5 +1,5 @@
 <?php
-namespace G\Fw;
+namespace G\Bck;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;

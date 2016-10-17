@@ -1,8 +1,8 @@
 <?php
 namespace Demo\App1;
 
-use G\Fw\BuilderAbstract;
-use G\Fw\BuilderIface;
+use G\Bck\BuilderAbstract;
+use G\Bck\BuilderIface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class Builder extends BuilderAbstract implements BuilderIface

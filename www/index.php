@@ -1,7 +1,7 @@
 <?php
 include __DIR__ . "/../vendor/autoload.php";
 
-use G\Fw\App\Builder;
+use G\Bck\App\Builder;
 use Demo\CredentialsValidator;
 use Demo\Logger;
 

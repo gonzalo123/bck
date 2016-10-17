@@ -1,5 +1,5 @@
 {
-  "name": "gonzalo123/fw",
+  "name": "gonzalo123/bck",
   "keywords": [
     "silex", "framework"
   ],
@@ -15,14 +15,12 @@
 
   "autoload": {
     "psr-4": {
-      "G\\Fw\\": "src/",
+      "G\\Bck\\": "src/",
       "Demo\\": "app/"
     }
   },
   "require": {
     "silex/silex": "1.3.*@dev",
-    "firebase/php-jwt": "^3.0",
-    "doctrine/couchdb": "^1.0@beta",
-    "monolog/monolog": "^1.21"
+    "firebase/php-jwt": "^3.0"
   }
 }

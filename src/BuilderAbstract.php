@@ -1,9 +1,8 @@
 <?php
-namespace G\Fw;
+namespace G\Bck;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class BuilderAbstract

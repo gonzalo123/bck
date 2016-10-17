@@ -1,7 +1,7 @@
 <?php
-namespace G\Fw\Auth;
+namespace G\Bck\Auth;
 
-use G\Fw\BuilderIface;
+use G\Bck\BuilderIface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 

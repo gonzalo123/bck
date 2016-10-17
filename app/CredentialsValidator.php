@@ -1,8 +1,8 @@
 <?php
 namespace Demo;
 
-use G\Fw\Auth\CredentialsJWTTrait;
-use G\Fw\Auth\CredentialsValidatorIface;
+use G\Bck\Auth\CredentialsJWTTrait;
+use G\Bck\Auth\CredentialsValidatorIface;
 
 class CredentialsValidator implements CredentialsValidatorIface
 {

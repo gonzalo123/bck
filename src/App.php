@@ -1,5 +1,5 @@
 <?php
-namespace G\Fw;
+namespace G\Bck;
 
 use Psr\Log\LoggerInterface;
 use Silex\Application;
