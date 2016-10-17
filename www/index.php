@@ -1,7 +1,12 @@
 <?php
 include __DIR__ . "/../vendor/autoload.php";
 
-\G\Fw\App\Builder::run(
+use G\Fw\App\Builder;
+use Demo\CredentialsValidator;
+use Demo\Logger;
+
+Builder::run(
     ['debug' => true],
     __DIR__ . "/../app/conf.json",
-    new \Demo\CredentialsValidator());
+    new CredentialsValidator(),
+    new Logger());

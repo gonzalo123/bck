@@ -1,6 +1,7 @@
 <?php
 namespace G\Fw;
 
+use Psr\Log\LoggerInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,12 +15,16 @@ class App
     private $conf;
     private $validator;
     private $authController;
+    private $logger;
+    private $logErrorMessage;
+    private $logOKMessage;
 
-    public function __construct(Application $app, Auth\CredentialsValidatorIface $validator, Auth\Controller $authController)
+    public function __construct(Application $app, Auth\CredentialsValidatorIface $validator, Auth\Controller $authController, LoggerInterface $logger)
     {
         $this->app            = $app;
         $this->validator      = $validator;
         $this->authController = $authController;
+        $this->logger         = $logger;
     }
 
     public function setConf($confPath)
@@ -85,21 +90,32 @@ class App
                     }
                 })
                       ->method(strtoupper($httpMethod))
-                      ->before(function (Request $request) use ($mountConf) {
-                          $token = $this->validator->getDecodedToken($request->get('_t'), $mountConf['secret']);
+                      ->before(function (Request $request) use ($mountConf, $pathInfo) {
+                          $requestToken = $request->get('_t');
+                          $token        = $this->validator->getDecodedToken($requestToken, $mountConf['secret']);
+                          $appName      = $mountConf['appName'];
+                          $user         = isset($this->app['user']) ? $this->app['user'] : 'unknown';
 
                           if ($token !== false) {
-                              if ($token->appName != $mountConf['appName']) {
+                              $user = $token->user;
+                              if ($token->appName != $appName) {
+                                  $this->logErrorMessage = "{$appName}::{$pathInfo}::{$user}::Access Denied. Wrong app in token";
                                   throw new AccessDeniedHttpException("Access Denied. Wrong app in token");
                               }
-                              if ($request->get('_v') == $mountConf['version']) {
-                                  $this->app['user'] = $token->user;
+                              $serverVersion = $mountConf['version'];
+                              $clientVersion = $request->get('_v');
+
+                              if ($clientVersion == $serverVersion) {
+                                  $this->app['user'] = $user;
                               } else {
+                                  $this->logErrorMessage = "{$appName}::{$pathInfo}::{$user}::Wrong app version. client: {$clientVersion} server: {$serverVersion}";
                                   throw new HttpException(412, "Wrong version");
                               }
                           } else {
+                              $this->logErrorMessage = "{$appName}::{$pathInfo}::{$user}::Wrong Token: {$requestToken}";
                               throw new AccessDeniedHttpException("Access Denied");
                           }
+                          $this->logOKMessage = "{$appName}::{$user}::Wrong app version. client: {$clientVersion} server: {$serverVersion}";
                       });
             }
 
@@ -107,9 +123,14 @@ class App
         }
 
         $this->app->finish(function (Request $request, Response $response, Application $app) {
-            error_log($request->getPathInfo());
-            //logger
+            if ($this->logErrorMessage) {
+                $this->logger->error($this->logErrorMessage);
+            }
+            if ($this->logOKMessage) {
+                $this->logger->info($this->logOKMessage);
+            }
         });
+
         $this->app->run($request);
     }
 
