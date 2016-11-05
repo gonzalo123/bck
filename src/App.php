@@ -50,7 +50,7 @@ class App
 
         $this->app->mount('/auth', $this->authController->getControllerFactory());
         if (!$this->authController->isValidRoute($request)) {
-            $mountConf = $this->conf[$request->get('app')];
+            $mountConf = $this->conf[$request->get('_a')];
             $this->setUpAppValues($mountConf);
         } else {
             /** @var ControllerCollection $route */
